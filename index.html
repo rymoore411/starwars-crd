@@ -24,7 +24,7 @@
     <script type='text/babel'>
       const {HashRouter, Route, Link} = ReactRouterDOM;
 
-      const Home = ()=> <div>Home</div>;
+      const Home = ()=> <div>Welcome!</div>;
 
       const List = ({people, onDelete}) => {
         return(
@@ -39,13 +39,13 @@
               }
           </ul>
         </div>
-        )
-      }
+        );
+      };
 
-      const CreatePerson = () => {
+      const CreatePerson = ({onCreate}) => {
 
         return(
-          <form>
+          <form onSubmit = {onCreate} >
             <label htmlFor='person'>Create Person:</label>
             <input name="person" type='text'/>
           </form>
@@ -60,11 +60,17 @@
             people: []
           };
           this.onDelete = this.onDelete.bind(this);
+          this.onCreate = this.onCreate.bind(this);
+        }
+
+        onCreate(person){
+          const people = [...this.state.people, person];
+          console.log(people);
         }
 
         onDelete(idx){
           const people = this.state.people.filter((person, id)=> id !== idx);
-          console.log(people);
+          this.setState({people});
 
         }
 
@@ -85,25 +91,26 @@
 
         render(){
           const {people} = this.state;
-          const {onDelete} = this;
+          const {onDelete, onCreate} = this;
           return (
             <HashRouter>
                 <div className = 'column'>
                   <Link to='/home'>Home</Link>
+                  <Route path ='/home' component={Home} />
                 </div>
                 <div className = 'column'>
                   <Link to='/people'>People ({people.length})</Link>
-                  <List people={people}/>
+                  <Route path ='/people' exact
+                render={()=> <List people={people} onDelete={onDelete} onCreate={onCreate}/>}/>
                 </div>
                 <div className = 'column'>
                   <Link to='/people/create'>Create a Person</Link>
-                  <CreatePerson/>
+                  <Route path = '/people/create' render={()=> <CreatePerson onCreate={onCreate}/>  }/>
                 </div>
 
-                <Route path ='/home' component={Home} />
-                <Route path ='/people' exact
-                render={()=> <List people={people} onDelete={onDelete}/>}/>
-                <Route path = '/people/create' render={()=> <CreatePerson/> }/>
+
+
+
             </HashRouter>
           );
         }
