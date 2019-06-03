@@ -3,6 +3,11 @@
 <style>
   * {
     box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .create{
+    align-items: center;
   }
 
   .column {
@@ -33,9 +38,13 @@
             <ul>
               {
                 people.map((person, idx) =>{
-                  return (
-                      <li onClick={ ()=> onDelete(idx)} key={idx}>{person.name}</li>
-                  )
+                  if(!person.name){
+                    return (<li key={idx}>{person}{" "}<button type="button" onClick={ ()=> onDelete(idx)}>x</button></li>)
+                  }
+
+                  else{
+                  return (<li key={idx}>{person.name}{" "}<button type="button" onClick={ ()=> onDelete(idx)}>x</button></li>)
+                  }
                 })
               }
           </ul>
@@ -46,10 +55,15 @@
       const CreatePerson = ({onSubmit, onChange, name}) => {
 
         return(
+          <div className='Create'>
+          <h1>Create Person</h1>
           <form onSubmit = {onSubmit} >
-            <label htmlFor='name'>Create Person:</label>
+            <label htmlFor='name'></label>
             <input name="name" type='text' value={name} onChange={onChange}/>
+
+            <button disabled ={(!name) ? true : false} type='submit'>Create</button>
           </form>
+          </div>
         )
 
       }
