@@ -1,0 +1,122 @@
+<html>
+  <head>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .column {
+    float: left;
+    width: 33.33%;
+    padding: 10px;
+    height: 300px;
+  }
+
+</style>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js'></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/5.0.0/react-router-dom.js'></script>
+  </head>
+  <body>
+    <div id='root'></div>
+    <script type='text/babel'>
+      const {HashRouter, Route, Link} = ReactRouterDOM;
+
+      const Home = ()=> <div>Home</div>;
+
+      const List = ({people, onDelete}) => {
+        return(
+          <div>
+            <ul>
+              {
+                people.map((person, idx) =>{
+                  return (
+                      <li onClick={ ()=> onDelete(idx)} key={idx}>{person.name}</li>
+                  )
+                })
+              }
+          </ul>
+        </div>
+        )
+      }
+
+      const CreatePerson = () => {
+
+        return(
+          <form>
+            <label htmlFor='person'>Create Person:</label>
+            <input name="person" type='text'/>
+          </form>
+        )
+
+      }
+
+      class App extends React.Component{
+        constructor(){
+          super();
+          this.state = {
+            people: []
+          };
+          this.onDelete = this.onDelete.bind(this);
+        }
+
+        onDelete(idx){
+          const people = this.state.people.filter((person, id)=> id !== idx);
+          console.log(people);
+
+        }
+
+        async componentDidMount(){
+
+          try{
+            const peopleApi = axios.create({
+              baseURL: 'https://profs-star-wars.herokuapp.com/people/'
+            })
+            const people = (await peopleApi.get()).data;
+            console.log(people);
+            this.setState({people});
+          }
+          catch(err){
+            console.log(err);
+          }
+        }
+
+        render(){
+          const {people} = this.state;
+          const {onDelete} = this;
+          return (
+            <HashRouter>
+                <div className = 'column'>
+                  <Link to='/home'>Home</Link>
+                </div>
+                <div className = 'column'>
+                  <Link to='/people'>People ({people.length})</Link>
+                  <List people={people}/>
+                </div>
+                <div className = 'column'>
+                  <Link to='/people/create'>Create a Person</Link>
+                  <CreatePerson/>
+                </div>
+
+                <Route path ='/home' component={Home} />
+                <Route path ='/people' exact
+                render={()=> <List people={people} onDelete={onDelete}/>}/>
+                <Route path = '/people/create' render={()=> <CreatePerson/> }/>
+            </HashRouter>
+          );
+        }
+
+      }
+
+
+
+      const root = document.querySelector('#root')
+
+      ReactDOM.render(<App />, root)
+
+
+    </script>
+  </body>
+</html>
