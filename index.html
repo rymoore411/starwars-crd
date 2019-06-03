@@ -27,6 +27,7 @@
       const Home = ()=> <div>Welcome!</div>;
 
       const List = ({people, onDelete}) => {
+        console.log({people});
         return(
           <div>
             <ul>
@@ -42,12 +43,12 @@
         );
       };
 
-      const CreatePerson = ({onCreate}) => {
+      const CreatePerson = ({onSubmit, onChange, name}) => {
 
         return(
-          <form onSubmit = {onCreate} >
-            <label htmlFor='person'>Create Person:</label>
-            <input name="person" type='text'/>
+          <form onSubmit = {onSubmit} >
+            <label htmlFor='name'>Create Person:</label>
+            <input name="name" type='text' value={name} onChange={onChange}/>
           </form>
         )
 
@@ -57,15 +58,32 @@
         constructor(){
           super();
           this.state = {
-            people: []
+            people: [],
+            name: ""
           };
           this.onDelete = this.onDelete.bind(this);
           this.onCreate = this.onCreate.bind(this);
+          this.onSubmit = this.onSubmit.bind(this);
+          this.onChange = this.onChange.bind(this);
         }
 
-        onCreate(person){
-          const people = [...this.state.people, person];
+        onCreate(jedi){
+          const people = [...this.state.people, jedi];
           console.log(people);
+          this.setState({people});
+        }
+
+        onSubmit(event){
+          event.preventDefault();
+          this.onCreate(this.state.name);
+          console.log(this.state);
+          this.state.name = "";
+        }
+
+        onChange(event){
+          this.setState({
+            [event.target.name]: event.target.value
+          })
         }
 
         onDelete(idx){
@@ -81,7 +99,6 @@
               baseURL: 'https://profs-star-wars.herokuapp.com/people/'
             })
             const people = (await peopleApi.get()).data;
-            console.log(people);
             this.setState({people});
           }
           catch(err){
@@ -90,27 +107,25 @@
         }
 
         render(){
-          const {people} = this.state;
-          const {onDelete, onCreate} = this;
+          const {people, name} = this.state;
+          const {onDelete, onCreate, onSubmit, onChange} = this;
           return (
             <HashRouter>
                 <div className = 'column'>
                   <Link to='/home'>Home</Link>
                   <Route path ='/home' component={Home} />
                 </div>
+
                 <div className = 'column'>
                   <Link to='/people'>People ({people.length})</Link>
                   <Route path ='/people' exact
-                render={()=> <List people={people} onDelete={onDelete} onCreate={onCreate}/>}/>
+                render={()=> <List people={people} onDelete={onDelete}/>}/>
                 </div>
+
                 <div className = 'column'>
                   <Link to='/people/create'>Create a Person</Link>
-                  <Route path = '/people/create' render={()=> <CreatePerson onCreate={onCreate}/>  }/>
+                  <Route path = '/people/create' render={()=> <CreatePerson onSubmit={onSubmit} onChange={onChange} name={name} onCreate={onCreate}/>}/>
                 </div>
-
-
-
-
             </HashRouter>
           );
         }
