@@ -6,10 +6,6 @@
     font-family: Arial, Helvetica, sans-serif;
   }
 
-  .create{
-    align-items: center;
-  }
-
   .column {
     float: left;
     width: 33.33%;
@@ -29,10 +25,11 @@
     <script type='text/babel'>
       const {HashRouter, Route, Link} = ReactRouterDOM;
 
+      //Displays home
       const Home = ()=> <div>Welcome!</div>;
 
+      //Displays current list of people
       const List = ({people, onDelete}) => {
-        console.log({people});
         return(
           <div>
             <ul>
@@ -52,20 +49,19 @@
         );
       };
 
-      const CreatePerson = ({onSubmit, onChange, name}) => {
+      //Displays form to create person
+      const CreatePerson = ({onChange, name, history, onCreate}) => {
 
         return(
-          <div className='Create'>
+          <div>
           <h1>Create Person</h1>
-          <form onSubmit = {onSubmit} >
+          <form onSubmit={()=> onCreate(name, history)}>
             <label htmlFor='name'></label>
             <input name="name" type='text' value={name} onChange={onChange}/>
-
             <button disabled ={(!name) ? true : false} type='submit'>Create</button>
           </form>
           </div>
         )
-
       }
 
       class App extends React.Component{
@@ -73,39 +69,37 @@
           super();
           this.state = {
             people: [],
-            name: ""
+            name: "",
           };
           this.onDelete = this.onDelete.bind(this);
           this.onCreate = this.onCreate.bind(this);
-          this.onSubmit = this.onSubmit.bind(this);
           this.onChange = this.onChange.bind(this);
         }
 
-        onCreate(jedi){
-          const people = [...this.state.people, jedi];
-          console.log(people);
-          this.setState({people});
-        }
-
-        onSubmit(event){
+        //On submitting the form, a jedi is added to our list
+        //On submit, /people is pushed to empty history var
+        onCreate(jedi, history){
           event.preventDefault();
-          this.onCreate(this.state.name);
-          console.log(this.state);
+          const people = [...this.state.people, jedi];
+          this.setState({people});
+          history.push('/people');
           this.state.name = "";
         }
 
+        //Grabs the name of the jedi entered by the user, passed to onCreate
         onChange(event){
           this.setState({
-            [event.target.name]: event.target.value
+            [event.target.name]: event.target.value,
           })
         }
 
+        //On clicking the "x" button, jedi removed
         onDelete(idx){
           const people = this.state.people.filter((person, id)=> id !== idx);
           this.setState({people});
-
         }
 
+        //Pull in the data, set our state with initial jedi
         async componentDidMount(){
 
           try{
@@ -120,9 +114,10 @@
           }
         }
 
+        //Display our components: Home, List, CreatePerson
         render(){
           const {people, name} = this.state;
-          const {onDelete, onCreate, onSubmit, onChange} = this;
+          const {onDelete, onCreate, onChange} = this;
           return (
             <HashRouter>
                 <div className = 'column'>
@@ -138,18 +133,14 @@
 
                 <div className = 'column'>
                   <Link to='/people/create'>Create a Person</Link>
-                  <Route path = '/people/create' render={()=> <CreatePerson onSubmit={onSubmit} onChange={onChange} name={name} onCreate={onCreate}/>}/>
+                  <Route path = '/people/create' render={({history})=> <CreatePerson onChange={onChange} name={name} onCreate={onCreate} history={history}/>}/>
                 </div>
             </HashRouter>
           );
         }
 
       }
-
-
-
       const root = document.querySelector('#root')
-
       ReactDOM.render(<App />, root)
 
 
