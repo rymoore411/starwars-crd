@@ -79,6 +79,7 @@
         //On submitting the form, a jedi is added to our list
         //On submit, /people is pushed to empty history var
         onCreate(jedi, history){
+          // what is event being used for??
           event.preventDefault();
           const people = [...this.state.people, jedi];
           this.setState({people});
